@@ -101,11 +101,19 @@ export const handler: Handler = async (event: HandlerEvent, _context: HandlerCon
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '알 수 없는 오류';
 
-    if (message.includes('API_KEY_INVALID') || message.includes('API key')) {
+    if (message.includes('API_KEY_INVALID') || message.includes('API key not valid')) {
       return {
         statusCode: 401,
         headers: corsHeaders,
         body: JSON.stringify({ error: '유효하지 않은 API 키입니다.' }),
+      };
+    }
+
+    if (message.includes('429') || message.includes('Too Many Requests') || message.includes('quota')) {
+      return {
+        statusCode: 429,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'API 사용량 한도 초과로 이미지를 생성할 수 없습니다. 잠시 후 다시 시도해주세요.' }),
       };
     }
 
